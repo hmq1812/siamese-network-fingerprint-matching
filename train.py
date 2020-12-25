@@ -18,10 +18,10 @@ device = torch.device('cuda' if cuda else 'cpu')
 
 # Hyperparameters
 in_channel = 1
-batch_size = 32
+batch_size = 128
 learning_rate = 0.001
 step_size = 50
-num_epochs = 20
+num_epochs = 30
 
 
 # Load Data
