@@ -1,6 +1,7 @@
 # folder
 fingerprint_images/
 data/
+.idea/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
