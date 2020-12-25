@@ -1,6 +1,6 @@
 # folder
-dataset/
-fingerprint_images
+fingerprint_images/
+data/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
