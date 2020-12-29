@@ -72,6 +72,13 @@ def gaussian_noise(img, mean=0, var=10):
     return img
 
 
+def rotate(img, angle=30):
+    angle = int(random.uniform(-angle, angle))
+    h, w = img.shape[:2]
+    M = cv2.getRotationMatrix2D((int(w/2), int(h/2)), angle, 1)
+    img = cv2.warpAffine(img, M, (w, h))
+    return img
+
 # img2 = brightness(img, 0.5, 3)
 # img3 = zoom(img, 0.8)
 # noise_img = gaussian_noise(img) var = 70

@@ -2,6 +2,7 @@ import torch.nn as nn
 
 
 class EmbeddingNet(nn.Module):
+    # Input size = (1, 128, 128)
     def __init__(self):
         super(EmbeddingNet, self).__init__()
         self.convnet = nn.Sequential(nn.Conv2d(1, 32, 3), nn.PReLU(),
@@ -12,7 +13,7 @@ class EmbeddingNet(nn.Module):
                                      nn.MaxPool2d(2, stride=2)
                                      )
 
-        self.fc = nn.Sequential(nn.Linear(128 * 10 * 10, 256),
+        self.fc = nn.Sequential(nn.Linear(128 * 14 * 14, 256),
                                 nn.PReLU(),
                                 nn.Linear(256, 256),
                                 nn.PReLU(),

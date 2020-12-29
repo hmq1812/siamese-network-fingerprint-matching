@@ -21,11 +21,11 @@ in_channel = 1
 batch_size = 128
 learning_rate = 0.001
 step_size = 50
-num_epochs = 30
+num_epochs = 50
 
 
 # Load Data
-img_dir = sorted(glob.glob('data/*.jpg'))
+img_dir = sorted(glob.glob('train_data/*.jpg'))
 classes = [int(i) for i in range(get_img_label(img_dir[-1]))]
 
 transforms = transforms.Compose([
@@ -44,6 +44,7 @@ test_loader = DataLoader(dataset=test_set, batch_size=batch_size, shuffle=True)
 # Model
 embedding_net = EmbeddingNet()
 model = TripletNet(embedding_net)
+
 model.to(device)
 
 # Loss and Optimizer
@@ -53,5 +54,8 @@ optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr
 scheduler = lr_scheduler.StepLR(optimizer, step_size=step_size, gamma=0.1)
 
 # Train Network
-log_interval = 100
-fit(train_loader, test_loader, model, loss, optimizer, scheduler, num_epochs, cuda, log_interval)
+fit(train_loader, test_loader, model, loss, optimizer, scheduler, num_epochs, cuda)
+
+# Save network
+path = "model.pth"
+torch.save(model.state_dict(), path, _use_new_zipfile_serialization=False)

@@ -1,42 +1,42 @@
 import torch
 import numpy as np
+from tqdm import tqdm
+import math 
 
-
-def fit(train_loader, val_loader, model, loss_fn, optimizer, scheduler, n_epochs, cuda, log_interval, metrics=[],
-        start_epoch=0):
+def fit(train_loader, val_loader, model, loss_fn, optimizer, scheduler, n_epochs, cuda, model_save_path='model.pth', start_epoch=0):
     for epoch in range(0, start_epoch):
         scheduler.step()
 
+    best_loss = math.inf
+
     for epoch in range(start_epoch, n_epochs):
         scheduler.step()
+        print('Epoch: {}/{}'.format(epoch + 1, n_epochs))
 
         # Train stage
-        train_loss, metrics = train_epoch(train_loader, model, loss_fn, optimizer, cuda, log_interval, metrics)
+        train_loss = train_epoch(train_loader, model, loss_fn, optimizer, cuda)
 
-        message = 'Epoch: {}/{}. Train set: Average loss: {:.4f}'.format(epoch + 1, n_epochs, train_loss)
-        for metric in metrics:
-            message += '\t{}: {}'.format(metric.name(), metric.value())
+        message = '\nAverage training loss: {:.4f}. '.format(train_loss)
 
-        val_loss, metrics = test_epoch(val_loader, model, loss_fn, cuda, metrics)
+        val_loss = test_epoch(val_loader, model, loss_fn, cuda)
         val_loss /= len(val_loader)
 
-        message += '\nEpoch: {}/{}. Validation set: Average loss: {:.4f}'.format(epoch + 1, n_epochs,
-                                                                                 val_loss)
-        for metric in metrics:
-            message += '\t{}: {}'.format(metric.name(), metric.value())
-
+        message += 'Average validating loss: {:.4f}'.format(val_loss)
         print(message)
 
+        if val_loss < best_loss:
+            best_loss = val_loss
+            torch.save(model.state_dict(), model_save_path, _use_new_zipfile_serialization=False)
+            print('Saving best model...')
 
-def train_epoch(train_loader, model, loss_fn, optimizer, cuda, log_interval, metrics):
-    for metric in metrics:
-        metric.reset()
+        print('\n' + '='*80 + '\n')
 
+def train_epoch(train_loader, model, loss_fn, optimizer, cuda):
     model.train()
     losses = []
     total_loss = 0
 
-    for batch_idx, (data, target) in enumerate(train_loader):
+    for batch_idx, (data, target) in enumerate(tqdm(train_loader, desc="Training epoch", position=0, leave=False)):
         target = target if len(target) > 0 else None
         if not type(data) in (tuple, list):
             data = (data,)
@@ -63,30 +63,17 @@ def train_epoch(train_loader, model, loss_fn, optimizer, cuda, log_interval, met
         loss.backward()
         optimizer.step()
 
-        for metric in metrics:
-            metric(outputs, target, loss_outputs)
-
-        if batch_idx % log_interval == 0:
-            message = 'Train: [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                batch_idx * len(data[0]), len(train_loader.dataset),
-                100. * batch_idx / len(train_loader), np.mean(losses))
-            for metric in metrics:
-                message += '\t{}: {}'.format(metric.name(), metric.value())
-
-            print(message)
-            losses = []
+        losses = []
 
     total_loss /= (batch_idx + 1)
-    return total_loss, metrics
+    return total_loss
 
 
-def test_epoch(val_loader, model, loss_fn, cuda, metrics):
+def test_epoch(val_loader, model, loss_fn, cuda):
     with torch.no_grad():
-        for metric in metrics:
-            metric.reset()
         model.eval()
         val_loss = 0
-        for batch_idx, (data, target) in enumerate(val_loader):
+        for batch_idx, (data, target) in enumerate(tqdm(val_loader, desc="Validating epoch", position=0, leave=False)):
             target = target if len(target) > 0 else None
             if not type(data) in (tuple, list):
                 data = (data,)
@@ -108,7 +95,4 @@ def test_epoch(val_loader, model, loss_fn, cuda, metrics):
             loss = loss_outputs[0] if type(loss_outputs) in (tuple, list) else loss_outputs
             val_loss += loss.item()
 
-            for metric in metrics:
-                metric(outputs, target, loss_outputs)
-
-    return val_loss, metrics
+    return val_loss

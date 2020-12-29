@@ -1,6 +1,7 @@
 # folder
-fingerprint_images/
-data/
+original_images/
+train_data/
+test_data/
 .idea/
 
 # Byte-compiled / optimized / DLL files
