@@ -6,6 +6,7 @@ test_data/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
+Inference/__pycache__
 *.py[cod]
 *$py.class
 

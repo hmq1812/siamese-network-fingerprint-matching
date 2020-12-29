@@ -21,7 +21,7 @@ in_channel = 1
 batch_size = 128
 learning_rate = 0.001
 step_size = 50
-num_epochs = 50
+num_epochs = 40
 
 
 # Load Data
@@ -55,7 +55,3 @@ scheduler = lr_scheduler.StepLR(optimizer, step_size=step_size, gamma=0.1)
 
 # Train Network
 fit(train_loader, test_loader, model, loss, optimizer, scheduler, num_epochs, cuda)
-
-# Save network
-path = "model.pth"
-torch.save(model.state_dict(), path, _use_new_zipfile_serialization=False)
