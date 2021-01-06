@@ -27,7 +27,7 @@ class FingerPrintMatchingAPI(Resource):
     parser.add_argument('file1', type=werkzeug.datastructures.FileStorage, location='files', help="No 'file' header found")
     parser.add_argument('file2', type=werkzeug.datastructures.FileStorage, location='files', help="No 'file' header found")
     parser.add_argument('url1', type=str)
-    parser.add_argument('url1', type=str)
+    parser.add_argument('url2', type=str)
 
     def post(self):
         data = self.parser.parse_args()
@@ -41,25 +41,17 @@ class FingerPrintMatchingAPI(Resource):
             return {"errorCode": 3, "errorMessage": "Incorrect Image Format"}, 400
 
         try:
-            print('tryingg yhihihii')
             byte_image1 = file1.read()
-            print(type(byte_image1))
             byte_image2 = file2.read()
             image1 = Image.open(BytesIO(byte_image1))
             image2 = Image.open(BytesIO(byte_image2))
-            print(type(image1))
             embedding1 = model.get_embedding(image1)
-            print(embedding1)
             embedding2 = model.get_embedding(image2)
 
-            matching = model.match(embedding1, embedding2)
-            
-            print(matching)
-
-        except Exception as e:
-            print(e)
+            dist = model.calc_euclidean(embedding1, embedding2)
+        except:
             return {"errorCode": 1, "errorMessage": "Unreadable"}, 400
-        return {"errorCode": 0, "errorMessage": "Success", "matching": matching}, 200
+        return {"errorCode": 0, "errorMessage": "Success", "Euclidean distance": dist}, 200
                 
     def get(self):
         data = self.parser.parse_args()
@@ -76,15 +68,15 @@ class FingerPrintMatchingAPI(Resource):
             return {"errorCode": 2, "errorMessage": "Url is unavailable"}, 400
 
         try:
-            image = Image.open(BytesIO(byte_image1))  
-            image = Image.open(BytesIO(byte_image2))  
+            image1 = Image.open(BytesIO(byte_image1))
+            image2 = Image.open(BytesIO(byte_image2))
             embedding1 = model.get_embedding(image1)
             embedding2 = model.get_embedding(image2)
-            matching = model.match(embedding1, embedding2)
-            
+
+            dist = model.calc_euclidean(embedding1, embedding2)
         except:
             return {"errorCode": 1, "errorMessage": "Unreadable"}, 400
-        return {"errorCode": 0, "errorMessage": "Success", "matching": matching}, 200     
+        return {"errorCode": 0, "errorMessage": "Success", "Euclidean distance": dist}, 200
 
 
 api.add_resource(FingerPrintMatchingAPI, "/fingerprintMatching")
@@ -102,4 +94,4 @@ def get_ip():
 
 
 if __name__ == '__main__':
-    app.run(host=get_ip(), port=5000, debug=True)
+    app.run(host=get_ip(), port=5001, debug=True)

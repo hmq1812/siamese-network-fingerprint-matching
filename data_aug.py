@@ -2,29 +2,17 @@ import cv2
 import random
 import numpy as np
 
-def brightness(img, low, high):
-    value = random.uniform(low, high)
-    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    hsv = np.array(hsv, dtype = np.float64)
-    hsv[:,:,1] = hsv[:,:,1]*value
-    hsv[:,:,1][hsv[:,:,1]>255]  = 255
-    hsv[:,:,2] = hsv[:,:,2]*value 
-    hsv[:,:,2][hsv[:,:,2]>255]  = 255
-    hsv = np.array(hsv, dtype = np.uint8)
-    img = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
-    return img
-
 
 def fill(img, h, w):
     img = cv2.resize(img, (w, h), cv2.INTER_CUBIC)
     return img
 
 
-def zoom(img, value):
+def zoom(img, value, upper_value=1):
     if value > 1 or value < 0:
         print('Value for zoom should be less than 1 and greater than 0')
         return img
-    value = random.uniform(value, 1)
+    value = random.uniform(value, upper_value)
     h, w = img.shape[:2]
     h_taken = int(value*h)
     w_taken = int(value*w)
