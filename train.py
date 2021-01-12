@@ -6,11 +6,11 @@ import torch.optim.lr_scheduler as lr_scheduler
 from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 
-from dataset import TripletFingerprintDataset
-from network import TripletNet, EmbeddingNet
-from losses import TripletLoss
-from trainer import fit
-from dataset import get_img_label
+from dataset import FingerprintDataset, BalancedBatchSampler, get_img_label
+from triplet_selector import HardestNegativeTripletSelector, SemihardNegativeTripletSelector
+from network import EmbeddingNet
+from losses import OnlineTripletLoss
+from train_module import fit
 
 # Device
 cuda = torch.cuda.is_available()
@@ -25,33 +25,36 @@ num_epochs = 40
 
 
 # Load Data
-img_dir = sorted(glob.glob('train_data/*.jpg'))
-classes = [int(i) for i in range(get_img_label(img_dir[-1]))]
+train_dir = sorted(glob.glob('train_data/train_set/*.jpg'))
+valid_dir = sorted(glob.glob('train_data/valid_set/*.jpg'))
+
+train_label = [get_img_label(img) for img in train_dir]
+valid_label = [get_img_label(img) for img in valid_dir]
 
 transforms = transforms.Compose([
-    transforms.ToTensor(),
-    # transforms.Normalize(mean=[0.485, 0.456, 0.406],
-    #                      std=[0.229, 0.224, 0.225])
+    transforms.ToTensor()
 ])
+train_set = FingerprintDataset(train_dir, transforms)
+valid_set = FingerprintDataset(valid_dir, transforms)
 
-dataset = TripletFingerprintDataset(img_dir, classes, transform=transforms)
-lengths = [int(len(dataset)*0.8), int(len(dataset)*0.2)]
-train_set, test_set = torch.utils.data.random_split(dataset, [int(len(dataset)*0.8), len(dataset)-int(len(dataset)*0.8)])
+train_batch_sampler = BalancedBatchSampler(train_label, n_classes=50, n_samples=4)
+test_batch_sampler = BalancedBatchSampler(valid_label, n_classes=50, n_samples=4)
 
-train_loader = DataLoader(dataset=train_set, batch_size=batch_size, shuffle=True)
-test_loader = DataLoader(dataset=test_set, batch_size=batch_size, shuffle=True)
+kwargs = {'num_workers': 1, 'pin_memory': True} if cuda else {}
+
+train_loader = DataLoader(dataset=train_set, batch_sampler=train_batch_sampler, **kwargs)
+valid_loader = DataLoader(dataset=valid_set, batch_sampler=test_batch_sampler, **kwargs)
 
 # Model
-embedding_net = EmbeddingNet()
-model = TripletNet(embedding_net)
+model = EmbeddingNet()
 
 model.to(device)
 
 # Loss and Optimizer
 margin = 1.
-loss = TripletLoss(margin)
+loss = OnlineTripletLoss(margin, HardestNegativeTripletSelector(margin))
 optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=learning_rate)
 scheduler = lr_scheduler.StepLR(optimizer, step_size=step_size, gamma=0.1)
 
 # Train Network
-fit(train_loader, test_loader, model, loss, optimizer, scheduler, num_epochs, cuda)
+fit(train_loader, valid_loader, model, loss, optimizer, scheduler, num_epochs, cuda)

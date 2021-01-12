@@ -1,1 +1,1 @@
-weight_path = 'model_data/model.pth'
+weight_path = 'model_data/onlinetripletloss_hardestneg_39.pth'

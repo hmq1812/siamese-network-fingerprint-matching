@@ -1,7 +1,6 @@
 # folder
-original_images/
+original_data/
 train_data/
-test_data/
 .idea/
 
 # Byte-compiled / optimized / DLL files

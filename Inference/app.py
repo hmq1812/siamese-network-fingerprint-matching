@@ -94,4 +94,4 @@ def get_ip():
 
 
 if __name__ == '__main__':
-    app.run(host=get_ip(), port=5001, debug=True)
+    app.run(host=get_ip(), port=5001, debug=False)

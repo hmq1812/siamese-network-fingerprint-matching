@@ -8,12 +8,15 @@ def cvt_gray_resize_img(img, size=(128, 128)):
     img = cv2.resize(img, size)
     return img
 
-train_path = 'train_data'
-img_list = sorted(glob.glob('original_images/*.jpg'))
+train_path = 'train_data/train_set'
+valid_path = 'train_data/valid_set'
+img_list = sorted(glob.glob('original_data/train_images/*.jpg'))
 
 
 for i, img_path in enumerate(img_list):
     output_path = train_path
+    if i >= 16000:
+        output_path = valid_path
     
     img = cv2.imread(img_path)
     cv2.imwrite(os.path.join(output_path, str(i) + '_original.jpg'), cvt_gray_resize_img(img))

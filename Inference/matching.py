@@ -4,7 +4,7 @@ import torch
 import torchvision.transforms as transforms
 from scipy.spatial import distance
 
-from network import EmbeddingNet, TripletNet
+from network import EmbeddingNet
 from config import *
 
 class FingerPrintMatching(object):
@@ -12,7 +12,7 @@ class FingerPrintMatching(object):
         self.threshold = 1.75
         self.cuda = torch.cuda.is_available()
         self.device = torch.device('cuda' if self.cuda else 'cpu')
-        self.model = TripletNet(EmbeddingNet())
+        self.model = EmbeddingNet()
         self.model.load_state_dict(torch.load(weight_path, map_location=self.device))
         # self.model.to(device)
 
@@ -32,9 +32,9 @@ class FingerPrintMatching(object):
         return embedding
 
     def calc_euclidean(self, x1, x2):
+        # return ((x1 - x2).pow(2).sum(1)).pow(1/2)
         x1_np = x1.cpu().detach().numpy()
         x2_np = x2.cpu().detach().numpy()
-        # return ((x1 - x2).pow(2).sum(1)).pow(1/2)
         return distance.euclidean(x1_np, x2_np)
 
     def match(self, x1, x2):
