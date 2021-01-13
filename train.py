@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 
 from dataset import FingerprintDataset, BalancedBatchSampler, get_img_label
-from triplet_selector import HardestNegativeTripletSelector, SemihardNegativeTripletSelector
+from triplet_selector import HardestNegativeTripletSelector, SemihardNegativeTripletSelector, RandomNegativeTripletSelector
 from network import EmbeddingNet
 from losses import OnlineTripletLoss
 from train_module import fit
@@ -52,7 +52,7 @@ model.to(device)
 
 # Loss and Optimizer
 margin = 1.
-loss = OnlineTripletLoss(margin, HardestNegativeTripletSelector(margin))
+loss = OnlineTripletLoss(margin, RandomNegativeTripletSelector(margin))
 optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=learning_rate)
 scheduler = lr_scheduler.StepLR(optimizer, step_size=step_size, gamma=0.1)
 

@@ -27,7 +27,10 @@ def hardest_negative(loss_values):
     hard_negative = np.argmax(loss_values)
     return hard_negative if loss_values[hard_negative] > 0 else None
 
-
+def random_hard_negative(loss_values):
+    hard_negatives = np.where(loss_values > 0)[0]
+    return np.random.choice(hard_negatives) if len(hard_negatives) > 0 else None
+    
 def semihard_negative(loss_values, margin):
     semihard_negatives = np.where(np.logical_and(loss_values < margin, loss_values > 0))[0]
     return np.random.choice(semihard_negatives) if len(semihard_negatives) > 0 else None
@@ -86,7 +89,10 @@ def HardestNegativeTripletSelector(margin, cpu=False): return FunctionNegativeTr
                                                                                  negative_selection_fn=hardest_negative,
                                                                                  cpu=cpu)
 
-
+def RandomNegativeTripletSelector(margin, cpu=False): return FunctionNegativeTripletSelector(margin=margin,
+                                                                                negative_selection_fn=random_hard_negative,
+                                                                                cpu=cpu)
+                                                                                	
 def SemihardNegativeTripletSelector(margin, cpu=False): return FunctionNegativeTripletSelector(margin=margin,
                                                                                   negative_selection_fn=lambda x: semihard_negative(x, margin),
                                                                                   cpu=cpu)
