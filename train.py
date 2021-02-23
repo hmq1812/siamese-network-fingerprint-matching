@@ -21,7 +21,7 @@ in_channel = 1
 batch_size = 128
 learning_rate = 0.001
 step_size = 50
-num_epochs = 40
+num_epochs = 200
 
 
 # Load Data

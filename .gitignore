@@ -3,6 +3,10 @@ original_data/
 train_data/
 .idea/
 
+# notebook
+offline_triplet_loss_random_triplet.ipynb
+online_triplet_loss_hardest_neg.ipynb
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 Inference/__pycache__

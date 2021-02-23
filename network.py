@@ -13,9 +13,9 @@ class EmbeddingNet(nn.Module):
                                      nn.MaxPool2d(2, stride=2)
                                      )
 
-        self.fc = nn.Sequential(nn.Linear(128 * 16 * 16, 256),
+        self.fc = nn.Sequential(nn.Linear(128 * 16 * 16, 512),
                                 nn.PReLU(),
-                                nn.Linear(256, 256),
+                                nn.Linear(512, 256),
                                 nn.PReLU(),
                                 nn.Linear(256, 128)
                                 )
